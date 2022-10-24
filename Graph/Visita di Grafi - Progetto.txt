@@ -1,0 +1,1033 @@
+
+
+
+* 1 Descrizione problema
+* 2 Descrizione soluzione ad alto livello
+* 3 Descrizione implementazione mettendo i puntini sulle i
+* 4 Descrizione problemi incontrati
+* 5 Qualche parola sulla complessita'
+* 6 Descrizione prove effettuate + statistica
+* 7 Manualetto d'uso e consumo
+* 8 Listato
+
+
+1. DESCRIZIONE DEL PROBLEMA
+
+------------------------------------
+
+Il progetto da noi sviluppato si basa sullo studio della visita in profondita'
+ai grafi, utilizzando i due metodi di rappresentazione visti a lezione :
+con matrice di adiacenza e con vettore di liste.
+I grafi presi in esame sono non direzionati e non pesati.
+ In particolare viene fatta un'analisi delle differenze di prestazioni in base
+al numero di operazioni effettuate durante la visita. Per fare questo si
+generano vari grafi con caratteristiche diverse : densi, sparsi, equilibrati;
+in base al tipo di grafo si cerca di mettere in luce i pregi e i difetti di
+ciascuna delle due rappresentazioni.
+
+Il problema prevede anche :
+
+ 1) la generazione automatica del grafo effettuata
+    casualmente dal programma in modo da risparmiare all'utente il gravoso
+    compito di inserire manualmente i vari archi.
+
+ 2) Visualizzazione della matrice di adiacenza e del vettore di liste in maniera
+    ordinata, in modo da permettere all'utente di poter verificare i risultati 
+    che si ottengono.
+
+ 3) Visualizzazione dei risultati ottenuti in modo da trarne le dovute
+    conclusioni.
+
+
+
+2. DESCRIZIONE SOLUZIONE ADOTTATA
+
+2.1 PANORAMICA SULLA SOLUZIONE.
+Il programma che abbiamo realizzato mira ad analizzare la complessita' degli algoritmi 
+di visita in profondita' dei grafi, eseguendo delle prove su grafi rappresentati sia 
+per mezzo di liste sia per mezzo di matrici di adiacenza. 
+Il cuore del programma e' quindi dato dalle procedure di visita, all'interno delle quali 
+sono state inserite opportunamente delle istruzioni per il conteggio delle operazioni 
+effettute dall'algoritmo. Dovendo fare delle prove su grafi di dimensioni relativamente 
+piccoli (contenenti al massimo 100 vertici), e avendo scelto di utilizzare il Pascal come 
+linguaggio di programmazione, abbiamo ritenuto piu' opprtuno farci un'idea della 
+complessita' in base al numero di operazioni "chiave" che non al tempo effettivamente 
+impiegato dagli algoritmi. 
+L'aver scelto di scrivere il programma in Pascal ci ha obbligati a implementare la matrice 
+di adiacenza del grafo come un array bidimensionale di tipo "boolean"; questo significa che 
+per la memorizzazione di un grafo di cento vertici, indipendentemente dal numero di archi 
+effettivamente presenti, la matrice di adiacenza occupa la bellezza di 100*100*8=80.000 bit:
+se invece avessimo potuto implementare la matrice come array bidimensionale di bit anziche' 
+di boolean, nel caso precedentemente menzionato di un grafo di 100 vertici, avremmo avuto 
+bisogno di soli 100*100=10.000 bit!
+L'uso di grafi di piccole dimensioni ci ha inoltre sconsigliato di misurare il tempo 
+impiegato per la visita del grafo, in quanto le operazioni che vengono eseguite, dell'ordine 
+dei nanosecondi dato che non si usa la memoria secondaria, sono al piu' qualche centinaio e 
+quindi non avrebbe avuto senso usare istruzioni Pascal come GetTime che restituiscono il 
+tempo al piu' con una precisione dei centesimi di secondo.
+Cosi', nella procedura che fa uso del vettore di liste per memorizzare gli archi del grafo, 
+abbiamo semplicemente usato un contatore che si incrementa ogni volta che viene scorsa una 
+lista, mentre nella procedura che usa la matrice di adiacenza per la rappresentazione del 
+grafo, abbiamo usato un altro contatore che, similmente, si incrementa ogni volta che 
+viene esaminata una cella della matrice. 
+Per quanto riguarda i grafi su cui andiamo a lavorare, il programma chiede soltanto il 
+numero di vertici e di archi che vogliamo avere; poi la costruzione del grafo, come e' 
+lecito aspettarsi in casi come questi, e' totalmente "casuale", cioe' l'insieme degli 
+archi e' un sottoinsieme qualsiasi dell'insieme di tutti gli archi possibili.
+Oltre a quelle per la generazione degli archi, per la costruzione delle liste e della matrice
+di adiacenza e per la visita del grafo in entrambe le sue rappresentazioni, il programma 
+realizzato si compone di altre procedure di "contorno", come quelle per la visualizzazione 
+del grafo: con queste e' possibile stampare a video le varie liste oppure la matrice di 
+adiacenza, in modo da verificare anche visivamente la natura del grafo; vedere cioè se e' 
+piu' o meno denso, in  modo da accertarsi che la generazione degli archi sia davvero casuale.  
+ 
+La soluzione e' divisa in quattro parti individuabili ad "alto livello".
+Si procede quindi nel descrivere ciascun punto in maniera più dettagliata.
+
+   2.2 GENERAZIONE AUTOMATICA CASUALE DEL GRAFO
+         Per generare casualmente il grafo ci siamo trovati di fronte a varie
+       possibilita' ciascuna con i suoi pro e contro, oltre a vari problemi.
+       In questo paragrafo descriviamo la soluzione che e' stata adottata,
+       mentre nel capitolo 4 viene fatta una discussione sulle altre
+       possibilita' motivando la decisione di scartarle.
+
+         L'idea e' quella di selezionare casualmente un sottoinsieme di tutti
+       i possibili archi(MAX_E). Il numero di quest'ultimi e' chiaramente legato
+       al numero di vertici (V): la relazione fra queste due quantita' e' data
+       dalla nota formula di Gauss, ovvero MAX_E = V*(V+1)/2. Questo implica che
+       per ogni vertice aggiunto ad un grafo che ne contiene V si aggiungono
+       V+1 archi possibili. Quindi c'e' una relazione quadratica fra V e MAX_E.
+       Nella soluzione generiamo tutti i possibili archi ed estraiamo a caso
+       quelli necessari.
+
+         Gli archi selezionati sono poi usati per creare la matrice di adiacenza
+       e il vettore di liste.
+
+    2.3 VISUALIZZAZIONE MATRICE DI ADIACENZA E VETTORE DI LISTE
+          Per quanto riguarda la matrice di adiacenza e' rappresentata come una
+        tabella di V righe e V colonne. All'interno si trovano degli 1 e 0 in relazione alla
+        presenza o meno di un arco. Poiche' non puo' essere visualizzata in
+        un'unica schermata e' utilizzata la soluzione di scorrere la matrice
+        tramite il pratico uso delle quattro frecce della tastiera.
+          Per il vettore abbiamo stampato in sequenza i vertici contenuti
+        dalle liste puntate da ciascun elemento, prestando attenzione affinche'
+        il risultato sia leggibile, anche in caso di un grafo con molti vertici.
+
+    2.4 VISITA DEL GRAFO
+        Nella visita del grafo rappresentato come vettore di liste si procede
+        come segue secondo lo schema della visita in profondità: si parte dalla
+	prima locazione del vettore di liste e se questa non è stata visitata
+	prima allora varrà 0, altrimenti sarà già stata inizializzata col numero
+	della componente connessa alla quale appartiene. Nel primo caso si scorre
+	tutta la lista contenuta nella licazione stampando i nodi contenuti
+	e marcando le locazioni a loro relative come già visitate. Nel secondo
+	caso invece la procedura ignorerà la locazione contrassegnata da un numero
+	diverso da 0 in quanto appunto già visitata. 
+	Questa procedura produce sul video la sequenza dei vertici delle varie
+	componenti connesse del grafo, riportando in fondo il numero di operazioni
+	effettuate, dove per operazioni si intendono i confronti.
+	In maniera quasi analoga si effettua la visita sulla matrice tramite un'apposita 
+	procedura. Si tiene però conto che la gestione degli indici per spostarsi sulla 
+	matrice è differente. Anche in questo caso al termine della stampa ordinata
+	dei nodi visitati si presenta il totale delle operazioni di confronto fatte.
+
+3. Descrizione implementazione
+-------------------------------------------
+
+Per implementare il progetto È stato scelto il linguaggio Pascal, in quanto
+ci ha permesso di creare un programma strutturato e ben leggibile.
+La descrizione parte dalle strutture dati utilizzate, quindi si passa
+ad esaminare ogni singola procedura in maniera dettagliata.
+
+3.1 strutture dati usate
+Nella parte dichiarativa sono state innanzitutto definite due costanti che
+ci serviranno per tutto il programma :
+        - "maxV" che rappresenta il numero massimo di vertici
+        - "Tot_archi" che rappresenta il numero totale di archi possibili,
+                      ed È calcolato in base al valore di maxV attraverso la
+                      formula di Gauss.
+
+Sono stati definiti quindi i seguenti tipi :
+        -"coppiaV" È un record contenente due campi di tipo intero, V1 e V2
+                   e rappresenta un arco attraverso una coppia di vertici.
+        -"node" È un record con un campo v di tipo intero ed un campo next di
+                tipo puntatore ad un dato dello stesso tipo. Questo È un
+                singolo elemento di una  lista di vertici.
+        -"link" È un puntatore a "node" ci serve per accedere alla lista.
+        -"vett_archi" È un vettore di coppie di vertici di lunghezza pari al
+          numero massimo di archi. Questo ci serve contenere gli archi
+          generati che useremo nel corso del programma.
+        -"Vettore_liste" È un vettore di lunghezza pari al numero di vertici
+          che ci servir... per rappresentare il grafo attraverso liste di
+          adiacenza. Ogni elemento È un puntatore di accesso ad una lista.
+        -"mat_grafo" È una matrice quadrata di dimensione maxV * maxV che ci
+          servir... per rappresentare il grafo tramite una matrice di adiacenza.
+          Ogni elemento È un boolean che sta ad indicare la presenza o meno
+          di un arco.
+
+Dopo questi sono state allocate le variabili globali utilizzate nell'intero
+programma :
+         - "V", "E" contengono rispettivamente il numero di vertici e il
+           numero di archi che saranno definiti dall'utente.
+         - "adj" contiene il vettore di liste di adiacenza
+         - "archi" contiene gli archi generati
+         - "a" contiene la matrice di adiacenza.
+
+Passiamo ora a descrivere in rassegna le procedure che svolgono le varie
+operazioni descritte nel capitolo 2.
+
+3.2 implementazione generazione automatica del grafo
+Questa operazione È svolta dalle procedure "crea_archi" e "shuffle".
+
+-La procedura "crea_archi" prende come parametri di ingresso "V", "E" e il
+ vettore "archi" che restituir... modificato, infatti È passato per indirizzo.
+ Vengono dichiarate le variabili "i", "j" che ci servono per effettuare i vari
+ cicli, "cont" che conta il numero di archi generati e "risp" di tipo char che
+ ci servir... per interagire con l'utente.
+ Innanzitutto, tramite due cicli for annidati, si inizializza il vettore archi
+ inserendovi tutti gli archi possibili.
+ Questo vettore viene passato alla procedura "Shuffle" che provveder... a farne
+ una permutazione casuale.
+ Viene chiesto all'utente se vuole vedere gli archi creati in maniera da
+ poter fare eventuali verifiche. La parte restante della procedura stampa
+ il vettore "archi", facendo attenzione affinchÈ il risultato sia leggibile.
+
+-La procedura "shuffle" ha il compito di mescolare il vettore di archi.
+ Essa prende in ingresso il vettore di archi che restituir...
+ modificato e il numero di elementi "c" che ci interessa permutare.
+ Viene richiamata la procedura predefinita del Pascal "randomize" che
+ inizializza il generatore automatico di numeri casuali, in maniera da evitare
+ di ottenere sequenze di numeri uguali.
+        Partendo dall'ultimo elemento si scambia questo con uno di posizione
+ casuale restituita dalla funzione "random"; tramite un ciclo for questa
+ operazione viene fatta per tutti gli elementi del vettore.
+
+
+3.3 implementazione della costruzione del grafo
+Dopo avere creato il vettore degli archi casualmente, questo lo adoperiamo per
+costruire le strutture dati che implementano il grafo, cioÈ per riempire il
+vettore di liste e la matrice di adiacenza. Tale compito È svolto dalle
+procedure "crea_matrice_grafo" e "crea_lista_grafo" :
+
+-La procedura "crea_matrice_grafo" prende in ingresso i parametri "V" ed "E",
+ cioÈ il numero di vertici e di archi. All'inizio viene iniazializzata a
+ false la matrice di adiacenza tramite due cicli for annidati.
+ Tramite il ciclo for successivo vengono letti gli archi dal vettore "archi";
+ in particolare in "x" viene messo il primo vertice ed in "y" il secondo,
+ quindi si mettono le caselle corrispondenti uguali a "true" ad indicare la
+ presenza di un arco fra x ed y.
+
+-La procedura "crea_lista_grafo" prende anch'essa in ingresso i parametri "V"
+ ed "E". La prima operazione che svolge È quella di inizializzare, tramite il
+ primo ciclo for, il vettore di liste "adj" mettendo in ciascun elemento un
+ puntatore ad una lista vuota.
+ Tramite il ciclo for successivo vengono letti gli archi dal vettore "archi",
+ inserendo in "x" ed in "y" rispettivamente il primo ed il secondo vertice di
+ ciascun arco. Le operazioni successive consistono nell'inserire nella lista
+ corrispondente ad "x" il nodo "y" ed in quella corrispondente ad "y" il nodo
+ "x". Per fare questo viene creato un nuovo nodo con il comando Pascal "new"
+ mettendo nel campo "v" il valore di "x" e nel campo "next" il puntatore
+ alla vecchia lista corrispondente ad "y"; quindi si pone l'elemento del
+ vettore corrispondente ad "y" come puntatore alla nuova lista.
+ La stesse operazioni sono ripetute per la lista del nodo "x" solo se questo È
+ diverso da "y" in quanto altrimenti avremo delle liste con elementi ripetuti.
+
+
+3.4 implementazione visualizzazione del grafo
+Tale operazione È svolta dalle procedure "Stampa_lista_grafo" e
+"stampa_matrice", le quali si occupano rispettivamente di visualizzare
+il vettore di liste e la matrice di adiacenza generati.
+
+-La procedura "Stampa_lista_grafo" scorre tramite un ciclo for il vettore di
+ liste "adj" e per ciascun elemento di questo stampa la lista dei nodi
+ corrispondente. Per fare questo si utilizza un ciclo while dal quale si esce
+ non appena si trova il puntatore uguale a "nil", che indica la fine della
+ lista. All'interno della procedura si È usato anche delle routine come "textcolor"
+ e "gotoxy" per cercare di visualizzare il risultato in maniera ordinata.
+ Abbiamo anche fatto attenzione affinchÈ il risultato fosse stampato  in
+ schermate di 23 righe per volta.
+
+-La procedura "Stampa_matrice" prende come argomento la matrice di adiacenza "a" e dichiara delle variabili ausiliarie locali (int1, int2,...) che servono a vario titolo per la gestione della visualizzazione. All'interno della procedura è presente anche la sottoprocedura "rileggi" che serve unicamente a stampare un 1 o uno 0 rispettivamente al posto del valore booleano true o false. Si inizia con il cancellare lo schermo e inizializzare le variabili contatore int1 e int2 che serviranno ad indicare da quale riga e da quale colonna si intende cominciare a stampare la matrice. Si stampa poi un messaggio che istruisce l'utente su come scorrere la matrice. Dopodichè si entra in un ciclo repeat until nel quale la procedura effettua le seguenti operazioni:
+- Inizializza temp1 a int1+20 e temp2 a int2+20. Questo perché si vogliono stampare 20 righe e 20 colonne al massimo per volta. Se una delle due somme di cui sopra supera il numero massimo dei vertici si assegna proprio questo valore alla relativa variabile ausiliaria temp. 
+- Si procede con lo stampare la prima riga e la prima colonna esterne alla matrice, cioè i numeri corrispondenti ai vertici attualmente visualizzati. Per questo si stampano i numeri di vertice che vanno da int1 a temp1 per le righe e da int2 a temp2 per le colonne.
+- Con un doppio for si scorre poi la matrice riga per riga, stampando (tramite la funzione rileggi) gli 0 di colore bianco e gli 1 di colore rosso. La variabile riga è utilizzata per andare a capo e ripartire in modo ordinato.
+- Stampata la porzione di matrice, la procedura attende la pressione di un tasto da parte dell'utente: se l'utente preme invio, allora la procedura termina; altrimenti la procedura accetta la pressione i uno dei 4 tasti freccia che gli indicheranno come incrementare gli indici per visualizzare una nuova porzione di matrice;
+- In particolare la pressione della freccia a sinistra provocherà un decremento dell'indice delle colonne e quella a destra il suo incremento; la freccia in alto porterà al decremento dell'indice delle righe e al contrario quella verso il basso un incremento. In ogni caso la procedura non effettua nessuna variazione degli indici se si accorge che è stato raggiunto il limite della matrice (0 il minimo e 100 il massimo, per entrambi gli indici int1 e int2).
+Una volta che l'utente immette preme il tasto "invio" la procedura cancella lo schermo e termina.
+
+3.5 implementazione visita del grafo
+La visita del grafo È effettuata dalle procedure "visita_lista" e
+"visita_matrice" che, come si capisce dal loro nome, si occupano
+rispettivamente di visitare il grafo tramite il vettore di liste e tramite la
+matrice di adiacenza.
+Entrambe usano un vettore "val" di lunghezza uguale al numero massimo di
+vertici che sta ad indicare se un certo nodo È stato visitato o meno. In
+particolare, se val[k]=0 allora il nodo k non È stato ancora visitato, mentre
+se val[k]=i allora il nodo k si trova nella posizione i nel cammino di visita.
+Quindi il vettore "val" ci fa sapere anche l'ordine in cui sono stati visitati
+i nodi.
+Nelle due procedure si utilizza inoltre una variabile intera "op" per contare
+il numero di operazioni effettuate e per poter fare gli opportuni confronti e
+considerazioni.
+Entrambe le procedure sono formate da una sottoprocedura "visit" e da un
+programma principale. Quest'ultimo lavora in maniera simile in ambedue,
+inizializzando le variabili "id" e "op" a 0 (id contiene il numero di nodi
+visitati) e il vettore "val" a 0 per indicare che nessun nodo È stato
+ancora visitato. Quindi, tramite un ciclo for, viene richiamata la
+sottoprocedura visit per ogni nodo che non È stato ancora visitato.
+  Descriviamo quindi le due sottoprocedure "visit":
+
+-La procedura "visit" all'interno di "visita_lista" riceve in ingresso un
+ parametro intero "k" che contiene il nodo che vogliamo visitare.
+ Innanzitutto si incrementa "id", in quanto si sta per aggiungere un ulteriore
+ vertice al cammino di visita, e si pone "val[k]=id" in maniera tale da marcare
+ il nodo "k" come gi... visitato.
+ Si assegna alla variabile locale "t" il valore di "adj[k]", cioÈ il puntatore
+ alla lista dei vertici collegati a k.
+ Il ciclo while successivo effettua il cammino richiamando ricorsivamente la
+ procedura "visit" sui nodi incontrati non ancora visitati. In questa maniera
+ si percorre tutta la componente connessa associata al vertice "k".
+
+-La procedura "visit" all'interno di "visita_matrice" comincia anch'essa
+ incrementando la variabile "id" e aggiornando il valore di "val[k]".
+ Quindi si entra in un ciclo for all'interno del quale si richiama la
+ procedura "visit" per i vertici non ancora visitati e per i quali esiste un
+ arco di connessione.
+
+
+3.6 Implementazione altre procedure
+All'interno del programma sono state definite altre procedure il cui scopo
+principale È di interagire con l'utente richiedendo varie informazioni. Per
+questo motivo nell'implementarle si È cercato di creare un'interfaccia piu'
+amichevole possibile.
+
+-La procedura "intestazione" non fa altro che dare alcune informazioni sul
+ progetto.
+
+-La procedura "crea_grafo" richiede il numero di vertice e di archi desiderato,
+ facendo attenzione che quest'ultimo sia accettabile.
+ In caso contrario viene segnalato l'errore e chiesto il reinserimento.
+ Dopo questo vengono richiamate le procedure "crea_archi", "crea_matrice_grafo"
+ e "crea_lista_grafo" che sono gi... state descritte e che realizzano la
+ costruzione del grafo vera e propria.
+
+-La procedura "menu" realizza un menu di scelta tramite cui l'utente pu•
+ effettuare varie operazioni. Essa visualizza sul video le scelte possibili ed
+ attende la pressione di un tasto. Dopo questo, tramite un costrutto case
+ vengono richiamate le opportune procedure che svolgono il compito desiderato.
+ Viene fatto un controllo affinchÈ prima di effettuare le operazioni sul grafo
+ esso sia creato. Per questo È stata definita una variabile booleana
+ "grafo_creato" che viene posta a true solo dopo che È stato creato il grafo.
+ Se si tenta di fare operazioni senza avere creato un grafo viene stampato
+ un messaggio di errore.
+
+4) DESCRIZIONE DEI PROBLEMI INCONTRATI IN FASE DI REALIZZAZIONE DEL PROGETTO
+
+	  Per quanto riguarda i problemi, abbiamo trovato una certa difficoltà
+	soprattutto in due punti dell'implementazione della soluzione:
+	- la creazione casuale del grafo;
+	- la rappresentazione a video della matrice di adiacenza.
+	
+	  Nel primo punto dovevamo valutare più soluzioni, in cerca dell'algoritmo che
+	consentisse il miglior compromesso tra le seguenti qualità:
+		- generasse un grafo il più possibile casuale, i cui archi 
+		non fossero vincolati in qualche maniera alla struttura dati
+		che conteneva i vertici o all'ordine del loro inserimento.
+		Inoltre il grafo doveva essere corretto, cioè non dovevano 
+		essere creati archi ripetuti;
+		- fosse deterministico, nel senso che non permettesse in alcun
+		modo la seppure remota possibilità di entrare in un loop infinito;
+		- rappresentasse una soluzione efficiente in termini di complessità
+		e memoria occupata;
+	Le soluzioni che abbiamo allora preso in esame sono state essenzialmente
+	quattro:
+     	1) la prima e più intuitiva è stata quella di inizializzare le prime E
+	posizioni del vettore contenente le coppie di vertici con numeri casuali,
+	ma l'abbiamo subito scartata perchè non garantiva assolutamente la 
+	correttezza del grafo creato. Era infatti altamente probabile che si 
+	venissero a creare più archi dal vertice A al vertice B oppure l'arco
+	doppio A->B B->A, cosa che per la rappresentazione scelta non è ammessa.
+	
+     	2) abbiamo quindi pensato di utilizzare una struttura dati ad albero per
+	memorizzare le coppie di vertici già formate ed evitare così l'errore
+	visto in precedenza. Purtroppo però questa soluzione permetteva in linea
+	teorica un loop infinito. Dato infatti che i vertici erano comunque 
+	estratti in modo random, poteva essere al limite estratta sempre la stessa coppia.
+	Anche nel caso più plausibile che dopo un certo numero di estrazioni
+	si venisse a formare una coppia non estratta prima, l'algoritmo faceva
+	comunque (soprattutto per grafi densi) un numero considerevole di cicli
+	inutili, deteriorando notevolmente in efficienza.	
+
+     	3) abbiamo studiato allora il problema, cercando di trovare una struttura
+	dati ad hoc che permettesse un controllo diretto degli archi creati e
+	al tempo stesso una certa efficienza. La terza soluzione esaminata consisteva
+	nell'inizializzare un vettore K di V (numero vertici) elementi nella seguente
+	maniera: nella prima posizione veniva posto 1, nella seconda 2, e così
+	via fino a V. Poi il primo vertice veniva estratto in modo casuale tra
+	i V possibili. Per il secondo si andava a controllare il numero contenuto
+	nella posizione del vettore corrispondente al primo vertice. Il valore
+	trovato costituiva il 2° vertice. Si procedeva poi col decrementare di una
+	unità il valore della cella consultata. Nel caso il primo vertice estratto
+	fosse corrisposto a una posizione già uguale a 0 allora si partiva dalla
+	V-esima posizione di K, ricercando all'indietro una cella non ancora 
+	azzerata. Una volta trovata si formava l'arco dato dalla coppia indice
+	sul vettore - valore della cella. Con questo metodo si bilanciava un poco
+	il fatto che le celle di indice basso sul vettore avevano una probabilità
+	maggiore di quelle con indice alto di rimanere presto a zero. 
+	Con questo meccanismo si garantiva in effetti che non si formassero
+	archi ripetuti (per come è stato definito l'array). Inoltre il consumo di
+	memoria era piuttosto limitato e al più in un tempo finito era garantita
+	la terminazione dell'algoritmo. Purtroppo anche questa soluzione è stata
+	scartata perchè il grafo che si veniva a creare non era perfettamente
+	casuale, ovvero gli archi formati erano in qualche modo legati alla struttura
+	del vettore: ad esempio i primi archi erano quasi tutti dei loop al vertice
+	stesso, cosa che rendeva il grafo piuttosto "diagonalizzato". 
+
+     	4) l'ultima e più banale soluzione ci è sembrata il miglior compromesso
+	per vari motivi: è di facile implementazione e facile lettura; non
+	consente archi ripetuti; termina in un tempo finito; è piuttosto grossolana
+	in termini di realizzazione, ma con grafi abbastanza densi offre 
+	un impiego buono della memoria allocata. Semplicemente abbiamo costruito
+	un array di Max_archi_possibili posizioni. Poi lo abbiamo inizializzato
+	con tutte i possibili archi che si potevano formare con V vertici. 
+	Infine abbiamo effettuato uno shuffling degli elementi del vettore,
+	in modo tale che le prime E posizioni (con E numero degli archi richiesti
+	per il grafo) contenessero archi validi ai fini della costruzione del
+	grafo. Questo metodo presenta il suo maggior difetto nell'allocazione
+	di un'array di grosse dimensioni anche quando, nel caso di pochi archi,
+	molte di queste rimangono inutilizzate. Ciò nonostante dopo averne discusso
+	abbiamo ritenuto che fosse la migliore tra le soluzioni prese in esame.
+	Anche osservandone la complessità si nota che essendo la procedura Crea_archi
+	data dalla sottoprocedura shuffle (di ordine lineare) e dal doppio for
+	per l'inizializzazione del vettore, risulta di O(n+n), con n 
+	uguale al numero massimo di archi possibili con V vertici. E' comunque
+	la crescita quadratica di n a determinare una certa complessità intrinseca
+	del problema.
+
+	  Nel secondo punto si trattava di trovare un efficace metodo di rappresentare
+	il grafo ottenuto sul monitor. Per quanto riguardava il vettore di liste
+	siamo ricorsi alla soluzione più semplice scorrendo il vettore lista per
+	lista, mostrandone gli elementi contenuti. Per la matrice di adiacenza
+	il discorso era più difficile perchè considerata la definizione del 
+	monitor, grafi di grosse dimensioni non erano visualizzabili in un'unica
+	schermata, ma la loro matrice doveva essere scomposta in più parti.
+	Abbiamo allora deciso di sviluppare un'apposita procedura Stampa_matrice
+	in grado di scorrere la matrice di adiacenza nelle quattro direzioni
+	tramite le frecce della tastiera. In questo modo l'utente può muoversi
+	sulla matrice a sua discrezione, mentre solo una porzione della matrice
+	è visualizzata sullo schermo. 			
+	
+	  Nella realizzazione pratica del progetto non abbiamo trovato altre difficoltà
+	di rilievo, essendo possibile la consultazione dei testi riguardanti
+	la costruzione e la gestione dei grafi. 
+
+6) DESCRIZIONE PROVE EFFETTUATE E STATISTICA
+	
+	Una volta implementati gli algoritmi abbiamo testato la visita in profondità sia sulla matrice che sul vettore di liste, date le tre configurazioni di grafi: sparso, normale, denso. 
+Per un numero di vertici V infatti abbiamo distinto i tre casi considerando un numero E uguale a radice di V (grafo sparso), V (grafo equilibrato) e Max_E (grafo denso) dato da tutti gli archi possibili con V vertici. Per ognuno di questi casi abbiamo ripetuto 3 volte la prova.
+I risultati sono stati forniti direttamente dalla procedura di visita, come descritto in precedenza e riportati poi nella tabella sottostante :
+
+questa probabilmente conviene stamparla a parte insieme al grafico...che però non ho messo perché mi viene male : i dati sono troppo sparsi! Visualizzare contemporaneamente il valore 13 e 10100 è un casino.
+Nulla...
+
+--- vedi file tabella.doc ---
+
+Dalla quale si deduce che, almeno per quanto riguarda il paragone in termini di  di confronti, la matrice effettua in media molte più operazioni rispetto al vettore. Solo nel caso di grafo denso o pienole prestazioni tornano ad essere paragonabili. Inoltre anche sotto l'aspetto dell'occupazione di memoria, la soluzione della matrice risulta comunque onerosa. Ciò non toglie che non sia da scartare in qualunque caso, perché presenta aspetti positivi in altro tipo di contesto. 
+
+7) MANUALETTO D'USO	
+
+	  Nel presentare il progetto si è scelta una interfaccia a menù che
+	permettesse all'utente di muoversi in maniera più chiara all'interno del 
+	programma.
+	All'avvio appare il menù principale che offre 5 possibilità :
+		1 - crea grafo;
+		2 - visita grafo;
+		3 - visualizza matrice grafo;
+		4 - visualizza lista grafo;
+		5 - esci.
+	  Per accedere alle funzioni si deve premere il relativo numero.
+	Al fine di evitare malfunzionamenti, le funzioni 2,3,4 sono state limitate
+	rendendole possibili solamente dopo la creazione di un nuovo grafo 
+	(opzione 1). 
+1) Crea grafo: il programma procede col chiedere all'utente le 
+caratteristiche che avrà il nuovo grafo: numero dei vertici e numero degli archi.
+	A questo proposito effettua anche un controllo che impedisca di immettere
+	un numero troppo elevato di archi in relazione ai vertici richiesti
+	o altri valori errati. Dopodichè chiede se si vuogliono visualizzare 
+	gli E archi creati. In tal caso presenta una schermata con le coppie
+	di vertici dove di può verificare che non ce ne siano di scorretti.
+	Con "invio" si torna al menù principale. 
+	2) Visista Grafo: selezionando questa opzione il programma mostra il 
+	risultato della visita della matrice di adiacenza e del vettore di 
+	liste. In pratica vengono riportati l'ordine di visita dei vertici e
+	il numero di operazioni che l'algoritmo di visita ha effettuato nelle
+	due differenti rappresentazioni.
+	3) Visualizza matrice grafo: con questa opzione è possibile vedere il
+	grafo creato sottoforma di matrice. Se la matrice è troppo grande,
+	come suggerito dall'indicazione in fondo allo schermo, è possibile
+	scorrerla con i tasti freccia. La prima riga e la prima colonna indicano
+	il numero del vertice, mentre gli 1 di colore rosso segnalano un arco
+	tra il vertice corrispondente della riga e della colonna. Da notare che
+	essendo il grafo non direzionato la matrice assume un aspetto simmetrico
+	rispetto alla diagonale principale. La procedura non permette all'utente
+	di uscire dai limiti della matrice, segnalandone la fine. Con il tasto
+	invio si torna al menù principale.
+	4) Infine è possibile visualizzare il grafo anche sotto forma di vettore
+	di liste. Con questa opzione appare per ogni vertice l'elenco dei nodi
+	a cui il vertice stesso è connesso da un arco. Il vertice "capostipite"
+	è riportato in azzurro. Nel caso in cui il grafo non entra in un'unica
+	schermata, basta premere il solito tasto invio per procedere alla
+	videata successiva. 		
+	5) Con l'ultima opzione si esce anche dal menù principale e si termina
+	il programma.
+
+
+8) LISTATO
+
+Program Confronto_Grafi (input,output);
+uses crt, dos;
+const maxV = 100; {Numero massimo di vertici}
+      Tot_archi = ((maxV+1) * maxV) div 2;  {numero totale di archi calcolato
+                                             in base al numero di vertivi con
+                                             la formula di Gauss}
+
+type coppiaV=record
+                V1,V2:byte;
+             end;
+
+    link=^node;
+    node=record
+             v: byte;
+             next: link
+          end;
+
+    vettore_liste=array[1..maxV] of link;
+    vett_archi = array[1..Tot_archi] of coppiaV;
+    mat_grafo =array [1..maxV,1..maxV] of boolean;
+var
+    V,E : integer; {rispettivamente Num. Vertici e Num. Archi}
+    adj : vettore_liste; {lista di adiacenza}
+    archi : vett_archi; {vett. contenente le coppie di vertici congiunti
+                         da un arco}
+    x:integer;
+    a:mat_grafo;
+
+{------------------------------------------------}
+
+{Stampa_matrice______________________________________________________________}
+Procedure Stampa_matrice(a:mat_grafo);
+var int1, int2:integer;
+    key:char;
+    x,y,temp1,temp2:integer;
+    riga:integer;
+
+    function rileggi(ris:boolean):integer;
+    begin
+      if ris=true then
+           rileggi:=1
+      else
+          rileggi:=0;
+    end;
+
+begin
+     clrscr;
+     int1:=1; int2:=1;
+     textcolor(15);
+     textbackground(1);
+     gotoxy(10,25);
+     write('Usare i tasti freccia per scorrere la matrice - Invio per proseguire');
+     textcolor(15);
+     textbackground(0);
+     repeat
+        riga:=2;
+        temp1:=int1+20;
+        if temp1>V then temp1:=V;
+        temp2:=int2+20;
+        textcolor(10);
+        gotoxy(4,1);
+        if temp2>V then temp2:=V;
+        for x:=int2 to temp2 do
+                             begin
+                                  if x>9 then write(x,' ')
+                                     else write(x,'  ');
+                             end;
+        writeln;
+        for y:=int1 to temp1 do
+                              writeln(y,' ');
+        for x:=int1 to temp1 do
+            begin
+               gotoxy(4,riga);
+               for y:=int2 to temp2 do
+                           begin
+                             if rileggi(a[x,y])=1 then textcolor(12)
+                                else textcolor (15);
+                             write(rileggi(a[x,y]),'  ');
+                           end;
+               writeln;
+               riga:=riga+1;
+            end;
+        key:=readkey;
+        if key=chr(72) then
+                         begin
+                           if int1>1 then int1:=int1-1
+                              else
+                                  begin
+                                     gotoxy(68,23);
+                                     textcolor(14);
+                                     write ('Fine Matrice');
+                                     textcolor (15);
+                                    readkey;
+                                  end;
+                         end
+           else if key=chr(80) then
+                         begin
+                           if int1<v then int1:=int1+1
+                              else
+                                  begin
+                                     gotoxy(68,23);
+                                     textcolor(14);
+                                     write ('Fine Matrice');
+                                     textcolor (15);
+                                     readkey;
+                                  end;
+                         end
+                else if key=chr(75) then
+                         begin
+                           if int2>1 then int2:=int2-1
+                              else
+                                  begin
+                                     gotoxy(68,23);
+                                     textcolor(14);
+                                     write ('Fine Matrice');
+                                     textcolor (15);
+                                    readkey;
+                                  end;
+                         end
+                    else if key=chr(77) then
+                         begin
+                           if int2<v then int2:=int2+1
+                              else begin
+                                     gotoxy(68,23);
+                                     textcolor(14);
+                                     write ('Fine Matrice');
+                                     textcolor (15);
+                                     readkey;
+                                   end;
+                         end;
+        clrscr;
+     until  key=char(13)
+end;
+
+{crea_archi__________________________________________________________________}
+procedure crea_archi(V, E : integer; var archi : vett_archi);
+var
+   cont,j,i:integer;
+   risp : char;
+
+
+    procedure shuffle (var a : vett_archi; c : integer);
+    var
+       i, r : integer;
+       temp : coppiaV;
+    begin
+          randomize;
+          for i := c downto 2 do
+          begin
+               r := random(i) + 1;
+               temp := a[i];
+               a[i] := a[r];
+               a[r] := temp;
+          end;
+    end;
+
+
+begin
+    cont:=1;
+    for i:=1 to V do
+        for j:=1 to i do
+            begin                 archi[cont].v1:=j;
+                 archi[cont].v2:=i;
+                 cont:=cont+1;
+            end;
+    shuffle(archi, cont-1);
+    writeln ('Vuoi vedere gli archi creati ? (y/n)');
+    repeat
+          risp := readkey;
+    until risp in ['y','Y','n','N'];
+    if (risp='y') or (risp='Y') then
+    begin
+        writeln('Vettore archi creato : ');
+        for i:=1 to E do
+        begin
+           write (archi[i].V1:3,'->',archi[i].V2 :3);
+           textcolor(2);
+           write(' *');
+           textcolor(15);
+           if (i mod 168) = 0 then
+              readln;
+
+        end;
+        readln;
+    end;
+end;
+
+
+{crea_matrice_grafo__________________________________________________________}
+{procedura che crea la matrice di adiacenza}
+procedure crea_matrice_grafo (V, E : integer);
+var j,x,y: integer;
+begin
+     for x:=1 to V do
+         for y:=1 to V do
+             a[x,y]:=false;
+     for j:=1 to E do
+     begin
+          x:=archi[j].v1;
+          y:=archi[j].v2;
+          a[x,y]:=true;
+          a[y,x]:=true
+     end;
+end;
+
+{crea_lista_grafo____________________________________________________________}
+{procedura che crea il vettore di liste di adiacenza}
+procedure crea_lista_grafo (V, E : integer);
+var j,x,y: integer;
+    t: link;
+begin
+  for j:=1 to V do
+      adj[j]:=nil;
+  for j:=1 to E do
+  begin
+    x:=archi[j].v1;
+    y:=archi[j].v2;
+    new(t);
+    t^.v:=x;
+    t^.next:=adj[y];
+    adj[y]:=t;
+    if x<>y then
+    begin
+         new(t);
+         t^.v:=y;
+         t^.next:=adj[x];
+         adj[x]:=t;
+    end;
+  end;
+end;
+
+{Stampa_lista_grafo__________________________________________________________}
+{procedura che visualizza il vettore di liste di adiacenza}
+procedure Stampa_lista_grafo (adj:vettore_liste);
+var
+    x, c1, linee : integer;
+    t : link;
+begin
+     clrscr;
+     textcolor(14);
+     gotoxy(23,1);
+     writeln('QUESTA E'' LA LISTA DI ADIACENZA');
+     textcolor(15);
+     linee := 0;
+     for x:=1 to V do
+     begin
+          c1:=0;
+          t:=adj[x];
+          textcolor(11);
+          write (x,'->');
+          textcolor(15);
+          while t<>nil do
+          begin
+               c1 := c1 + 1;
+               write(t^.v,'->');
+               if c1 = 18 then
+               begin
+                    c1 := 0;
+                    writeln;
+                    linee := linee+1;
+                    if (linee mod 23 = 0) then
+                       readln;
+               end;
+               t:=t^.next;
+          end;
+          writeln;
+          linee := linee + 1;
+          if (linee mod 23 = 0) then
+                readln;
+          writeln;
+          linee := linee + 1;
+          if (linee mod 23 = 0) then
+                readln;
+       end;
+    readln;
+end;
+
+{visita_lista________________________________________________________________}
+{procedure che effettua la visita nel vettore di liste, contando il numero di
+operazioni effettuate}
+procedure visita_lista;
+var
+    id, k, op : integer;
+    val : array[1..maxV] of integer;
+
+  procedure visit(k: integer);
+    var
+       t : link;
+  begin
+    id:=id+1;
+    val[k]:=id;
+    t := adj[k];
+    write (k,'->');
+    while t<>nil do
+    begin
+      op := op+1;
+      if val[t^.v]=0 then
+         visit(t^.v);
+      t:=t^.next
+    end
+  end;
+
+begin
+  clrscr;
+  textcolor(14);
+  gotoxy(30,1);
+  write('VISITA LISTA : ');
+  TEXTCOLOR(15);
+  writeln;
+  writeln;
+  id := 0;
+  op := 0;
+  for k:=1 to V do
+      val[k]:=0;
+  for k:=1 to V do
+  begin
+    op := op+1;
+    if val[k]=0 then
+    begin
+         visit(k);
+         if (k mod 23=0) then
+            readln;
+         writeln ;
+    end;
+  end;
+  textcolor(14);
+  writeln;
+  writeln;
+  writeln ('Operazioni : ',op);
+  writeln ('Invio per tornare al menu ....  ');
+  textcolor(15);
+  readln;
+end;
+
+{visita_matrice______________________________________________________________}
+{procedura che effettua la visita nella matrice di adiacenza, contando il
+numero di operazioni effettuate}
+procedure visita_matrice;
+var id,k,op: integer;
+    val: array[1..maxV] of integer;
+
+  procedure visit(k: integer);
+  var t: integer;
+  begin
+  id:=id+1;
+  val[k]:=id;
+  write (k,'->');
+  for t:=1 to V do
+  begin
+       op := op+1;
+       if a[k,t] then
+       if val[t]=0 then
+          visit(t);
+  end;
+  end;
+
+begin
+  clrscr;
+  gotoxy(30,1);
+  textcolor(14);
+  writeln ('VISITA MATRICE : ');
+  textcolor(15);
+  writeln;
+  id:=0;
+  op := 0;
+  for k:=1 to V do val[k]:=0;
+  for k:=1 to V do
+  begin
+    op := op+1;
+    if val[k]=0 then
+    begin
+         visit(k);
+         if (k mod 23=0) then readln;
+         writeln ;
+    end;
+  end;
+  textcolor(14);
+  writeln;
+  writeln;
+  writeln ('Operazioni : ',op);
+  writeln ('Invio per visitare la lista ....  ');
+  textcolor(15);
+  readln;
+end;
+
+{Intestazione________________________________________________________________}
+Procedure intestazione;
+begin
+    {intestazione}
+       textcolor(14);
+       textbackground (2);
+       gotoxy(55,2);
+       writeln('                        ');
+       gotoxy(55,3);
+       writeln('                        ');
+       gotoxy(55,4);
+       writeln('                        ');
+       gotoxy(55,5);
+       writeln('                        ');
+       gotoxy(55,6);
+       writeln('                        ');
+       gotoxy(55,7);
+       writeln('                        ');
+       gotoxy(55,8);
+       writeln('                        ');
+       gotoxy(58,3);
+       textcolor(15);
+       write('PROGETTO: A.S.D. II');
+       textcolor(14+blink);
+       gotoxy(61,5);
+       write('Visita Grafi');
+       textcolor(15);
+       gotoxy(57,7);
+       write('Anno Accademico 99/00');
+end;
+
+{procedure crea_grafo _______________________________________________________}
+procedure crea_grafo (var E,V:integer; var archi:vett_archi);
+var
+   max_arch : integer;
+begin
+       clrscr;
+       gotoxy(1,5);
+       textcolor(14);
+       textbackground (9);
+       writeln('                                                  ');
+       writeln('                                                  ');
+       writeln('                                                  ');
+       gotoxy(1,6);
+       textbackground (11);
+       writeln('                                                  ');
+       repeat
+         gotoxy(1,6);
+         write('Inserisci il numero di vertici :     ');
+         gotoxy (34,6);
+         readln (V);
+       until v in [0..100];
+       gotoxy(1,9);
+       textbackground (9);
+       writeln('                                                  ');
+       writeln('                                                  ');
+       writeln('                                                  ');
+       gotoxy(1,10);
+       textbackground (11);
+       writeln('                                                  ');
+       gotoxy(1,10);
+       write ('Inserisci il numero di archi : ');
+       repeat
+         gotoxy(32,10);
+         write('            ');
+         gotoxy(32,10);
+         readln(E);
+         max_arch := ((V+1)*V) div 2;
+         if max_arch<E then
+                     begin
+                       gotoxy(30,15);
+                       textbackground(4);
+                       writeln('Numero archi non valido!');
+                       readln;
+                       textbackground(0);
+                       gotoxy(20,15);
+                       write('                                    ');
+                       textbackground(11);
+                     end;
+       until (max_arch>=E) and (E>0);
+       textbackground(8);
+       clrscr;
+       textcolor (15);
+       crea_archi (V, E, archi);
+       crea_matrice_grafo (V, E);
+       crea_lista_grafo(V, E);
+end;
+
+{menu________________________________________________________________________}
+procedure menu;
+var
+   scelta:char;
+   grafo_creato : boolean;
+
+procedure errore;
+begin
+  clrscr;
+  gotoxy(18,5);
+  textbackground(4);
+  textcolor(15+blink);
+  write('Errore : Devi prima creare un nuovo grafo ');
+  textbackground(0);
+  textcolor(15);
+  readln;
+end;
+
+begin
+     grafo_creato := false;
+     repeat
+        intestazione;
+        textbackground(12);
+        gotoxy (3,2);
+        write (' 1 ');
+        gotoxy (3,4);
+        write (' 2 ');
+        gotoxy (3,6);
+        write (' 3 ');
+        gotoxy (3,8);
+        write (' 4 ');
+        gotoxy (3,12);
+        write (' 5 ');
+        textbackground(0);
+        textcolor(15);        gotoxy (7,2);
+        write('CREA GRAFO');
+        gotoxy (7,4);
+        write('VISITA GRAFO');
+        gotoxy (7,6);
+        write('VISUALIZZA MATRICE GRAFO');
+        gotoxy (7,8);
+        write('VISUALIZZA LISTA GRAFO');
+        gotoxy (7,12);
+        write('ESCI');
+        scelta:=readkey;
+        case scelta of
+        '1': begin
+                  crea_grafo(E,V,Archi);
+                  grafo_creato := true;
+             end;
+        '2': begin
+               if not grafo_creato then errore
+               else begin
+                     visita_matrice;
+                     visita_lista;
+               end;
+             end;
+        '3': if not(grafo_creato) then errore
+                     else Stampa_matrice (a);
+
+        '4': if not(grafo_creato) then errore
+                 else Stampa_lista_grafo(adj);
+        end;
+
+        clrscr;
+     until scelta='5';
+end;
+
+
+{MAIN************************************************************************}
+Begin
+       clrscr;
+       menu;
+end.{MAIN}
